@@ -38,47 +38,41 @@ class Spider:
                 'window.scrollTo(0, document.body.scrollHeight)'  # 0表示x轴滚动距离，后面的表示y轴滚动到底
             )
             WebDriverWait(self.driver, 10).until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='comment']")))  # 等待指定元素出现
-            comments = self.driver.find_elements(By.XPATH, '//div[@id="comments"]/div[@class="comment-item "]/div[@class="comment"]/p/span[@class="short"]')
-            gelements = self.driver.find_elements(By.XPATH, '//div[@id="comments"]/div[@class="comment-item "]/div[@class="comment"]/h3/span[@class="comment-info"]/span[2]')
-            dates = self.driver.find_elements(By.XPATH, '//div[@id="comments"]/div[@class="comment-item "]/div[@class="comment"]/h3/span[@class="comment-info"]/span[3]')
-            areas = self.driver.find_elements(By.XPATH, '//div[@id="comments"]/div[@class="comment-item "]/div[@class="comment"]/h3/span[@class="comment-info"]/span[4]')
+            list = self.driver.find_elements(By.XPATH, '//div[@id="comments"]/div[@class="comment-item "]/div[@class="comment"]')
+            for li in list:
+                try:
+                    dic = {}
+                    dic["comment"] = li.find_element(By.XPATH, './/p/span[@class="short"]').text
+                    dic["area"] = li.find_element(By.XPATH, './/h3/span[@class="comment-info"]/span[@class="comment-location"]').text
+                    dic["time"] = li.find_element(By.XPATH, './/h3/span[@class="comment-info"]/span[@class="comment-time "]').text
+                    dic["grade"] = li.find_element(By.XPATH, './/h3/span[2]/span[2]').get_attribute("class")
+                    if dic["grade"] == "allstar50 rating":
+                        dic["grade"] = '5'  # 换成字符格式，因为如果用整型会警告
+                    elif dic["grade"] == "allstar40 rating":
+                        dic["grade"] = '4'
+                    elif dic["grade"] == "allstar30 rating":
+                        dic["grade"] = '3'
+                    elif dic["grade"] == "allstar20 rating":
+                        dic["grade"] = '2'
+                    elif dic["grade"] == "allstar10 rating":
+                        dic["grade"] = '1'
+                    else:
+                        dic["grade"] = "未给出分数"
+                    self.lst.append(dic)
+                except Exception as e:
+                    print(e)
             time.sleep(1)
-            for date in dates:
-                dic = {}
-                dic["times"] = date.text
-                self.lst.append(dic)
-            for area in areas:
-                dic = {}
-                dic["areas"] = area.text
-                self.lst.append(dic)
-            for comment in comments:
-                dic = {}
-                dic["comments"] = comment.text
-                self.lst.append(dic)
-            for gelement in gelements:
-                dic = {}
-                dic["grades"] = gelement.get_attribute("class")
-                if dic["grades"] == "allstar50 rating":
-                    dic["grades"] = 5
-                elif dic["grades"] == "allstar40 rating":
-                    dic["grades"] = 4
-                elif dic["grades"] == "allstar30 rating":
-                    dic["grades"] = 3
-                elif dic["grades"] == "allstar20 rating":
-                    dic["grades"] = 2
-                elif dic["grades"] == "allstar10 rating":
-                    dic["grades"] = 1
-                self.lst.append(dic)
             self.driver.find_element(By.XPATH, '//div[@id="paginator"]/a[3]').click()
         print(self.lst)
         # with open(f'{mname}.csv', 'w', encoding='utf-8', newline='') as f:
         #     writer = csv.DictWriter(f, fieldnames=['comments', 'grades', 'times', 'areas'])
         #     writer.writeheader()
         #     writer.writerows(self.lst)
-        with open(f'千寻小姐.csv', 'w', encoding='utf-8-sig', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['comments', 'grades', 'times', 'areas'])
+        with open(f'{mname}.csv', 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['comment', 'grade', 'time', 'area'])
             writer.writeheader()
             writer.writerows(self.lst)
+
 
 spider = Spider()
 spider.getdata()

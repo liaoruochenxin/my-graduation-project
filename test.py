@@ -3,6 +3,8 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import csv
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 class Spider:
@@ -30,34 +32,45 @@ class Spider:
         time.sleep(2)
         self.driver.find_element(By.XPATH, '//div[@id="comments-section"]/div[1]/h2/span/a').click()  # //*[@id="comments-section"]/div[1]/h2/span/a
         time.sleep(2)
-        list = self.driver.find_elements(By.XPATH, '//div[@id="comments"]/div[@class="comment-item "]/div[@class="comment"]')
-        time.sleep(3)
-        for li in list:
-            try:
-                dic = {}
-                dic['comments'] = li.find_element(By.XPATH, './/p/span[@class="short"]').text
-                vgrade = li.find_element(By.XPATH, './/h3/span[2]/span[2]').get_attribute('class')  # //*[@id="hot-comments"]/div[2]/div/h3/span[2]/span[2]
-                grade = '无'
-                if vgrade == "allstar50 rating":
-                    grade = 5
-                elif vgrade == "allstar40 rating":
-                    grade = 4
-                elif vgrade == "allstar30 rating":
-                    grade = 3
-                elif vgrade == "allstar20 rating":
-                    grade = 2
-                elif vgrade == "allstar10 rating":
-                    grade = 1
-                dic['grade'] = grade
-                # dic['vgrade'] = vgrade
-                self.lst.append(dic)
-            except Exception as e:
-                print(e)
-        print(self.lst)
-        with open(f'{mname}.csv', 'w', encoding='utf-8', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['comments', 'grade'])
+        for i in range(1, 11):
+            time.sleep(1)
+            self.driver.execute_script(
+                'window.scrollTo(0, document.body.scrollHeight)'  # 0表示x轴滚动距离，后面的表示y轴滚动到底
+            )
+            # 等待指定元素出现
+            WebDriverWait(self.driver, 10).until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='comment']")))
+
+            list = self.driver.find_elements(By.XPATH, '//div[@id="comments"]/div[@class="comment-item "]/div[@class="comment"]')
+            for li in list:
+                try:
+                    dic = {}
+                    dic["comment"] = li.find_element(By.XPATH, './/p/span[@class="short"]').text
+                    dic["area"] = li.find_element(By.XPATH, './/h3/span[@class="comment-info"]/span[@class="comment-location"]').text
+                    dic["time"] = li.find_element(By.XPATH, './/h3/span[@class="comment-info"]/span[@class="comment-time "]').text
+                    dic["grade"] = li.find_element(By.XPATH, './/h3/span[2]/span[2]').get_attribute("class")
+                    if dic["grade"] == "allstar50 rating":
+                        dic["grade"] = '5'  # 换成字符格式，因为如果用整型会警告
+                    elif dic["grade"] == "allstar40 rating":
+                        dic["grade"] = '4'
+                    elif dic["grade"] == "allstar30 rating":
+                        dic["grade"] = '3'
+                    elif dic["grade"] == "allstar20 rating":
+                        dic["grade"] = '2'
+                    elif dic["grade"] == "allstar10 rating":
+                        dic["grade"] = '1'
+                    else:
+                        dic["grade"] = "未给出分数"
+                    self.lst.append(dic)
+                except Exception as e:
+                    print(e)
+            time.sleep(1)
+            self.driver.find_element(By.XPATH, '//div[@id="paginator"]/a[3]').click()
+        # print(self.lst)
+        with open(f'{mname}.csv', 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['comment', 'grade', 'time', 'area'])
             writer.writeheader()
             writer.writerows(self.lst)
+
 
 spider = Spider()
 spider.getdata()
