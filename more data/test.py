@@ -75,7 +75,7 @@ class Spider:
         #     writer = csv.DictWriter(f, fieldnames=['comments', 'grades', 'times', 'areas'])
         #     writer.writeheader()
         #     writer.writerows(self.lst)
-        with open(f'千寻小姐.csv', 'w', encoding='GB18030', newline='') as f:
+        with open(f'千寻小姐.csv', 'w', encoding='utf-8-sig', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['comments', 'grades', 'times', 'areas'])
             writer.writeheader()
             writer.writerows(self.lst)

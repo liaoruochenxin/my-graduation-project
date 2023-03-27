@@ -16,7 +16,8 @@ class Spider:
         self.driver.get('https://movie.douban.com/')
         time.sleep(2)
 
-    def insert(self, mname):
+    def insert(self):
+        mname = input()
         self.driver.find_element(By.ID, 'inp-query').send_keys(mname)
         time.sleep(1)
         self.driver.find_element(By.ID, 'inp-query').send_keys(Keys.ENTER)  # 回车
@@ -52,17 +53,15 @@ class Spider:
                 self.lst.append(dic)
             except Exception as e:
                 print(e)
-        # print(self.lst)
+        print(self.lst)
         with open(f'{mname}.csv', 'w', encoding='utf-8', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['comments', 'grade'])
             writer.writeheader()
             writer.writerows(self.lst)
-    # def b1(self):
-    #     self.getdata()
-    #
-    # def b2(self, mname1):
-    #     self.insert(mname=mname1)
 
+spider = Spider()
+spider.getdata()
+spider.insert()
 
 
 
