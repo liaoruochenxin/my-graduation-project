@@ -37,9 +37,7 @@ class Spider:
             self.driver.execute_script(
                 'window.scrollTo(0, document.body.scrollHeight)'  # 0表示x轴滚动距离，后面的表示y轴滚动到底
             )
-            # 等待指定元素出现
-            WebDriverWait(self.driver, 10).until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='comment']")))
-
+            WebDriverWait(self.driver, 10).until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='comment']")))  # 等待指定元素出现
             list = self.driver.find_elements(By.XPATH, '//div[@id="comments"]/div[@class="comment-item "]/div[@class="comment"]')
             for li in list:
                 try:
@@ -65,7 +63,11 @@ class Spider:
                     print(e)
             time.sleep(1)
             self.driver.find_element(By.XPATH, '//div[@id="paginator"]/a[3]').click()
-        # print(self.lst)
+        print(self.lst)
+        # with open(f'{mname}.csv', 'w', encoding='utf-8', newline='') as f:
+        #     writer = csv.DictWriter(f, fieldnames=['comments', 'grades', 'times', 'areas'])
+        #     writer.writeheader()
+        #     writer.writerows(self.lst)
         with open(f'{mname}.csv', 'w', encoding='utf-8-sig', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['comment', 'grade', 'time', 'area'])
             writer.writeheader()
@@ -75,6 +77,3 @@ class Spider:
 spider = Spider()
 spider.getdata()
 spider.insert()
-
-
-
